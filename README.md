@@ -23,7 +23,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 - ah = upper 8-bits.
 - al = lower 8-bits.
 ```
- _________    Bit #
+ _________  Bit#
 |    |    | 00
 |    | al |
 | ax |____| 07
@@ -38,7 +38,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 - bh = upper 8-bits.
 - bl = lower 8-bits.
 ```
- _________    Bit #
+ _________  Bit#
 |    |    | 00
 |    | bl |
 | bx |____| 07
@@ -53,7 +53,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 - ch = upper 8-bits.
 - cl = lower 8-bits.
 ```
- _________    Bit #
+ _________  Bit#
 |    |    | 00
 |    | cl |
 | cx |____| 07
@@ -68,7 +68,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 - dh = upper 8-bits
 - dl = lower 8-bits
 ```
- _________    Bit #
+ _________  Bit#
 |    |    | 00
 |    | dl |
 | dx |____| 07
@@ -79,7 +79,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 #### Stack pointer:
 - Pointer to top of stack.
 ```
- _________    Bit #
+ _________  Bit#
 |         | 00
 |   sp    |
 |_________| 15
@@ -88,7 +88,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 #### Base Pointer:
 - Pointer to any location on the stack.
 ```
- _________    Bit #
+ _________  Bit#
 |         | 00
 |   bp    |
 |_________| 15
@@ -97,7 +97,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 #### Source Index Register:
 - Pointer to data source.
 ```
- _________    Bit #
+ _________  Bit#
 |         | 00
 |   si    |
 |_________| 15
@@ -106,7 +106,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 #### Destination Index Register:
 - Pointer to data destination.
 ```
- _________    Bit #
+ _________  Bit#
 |         | 00
 |   di    |
 |_________| 15
@@ -115,7 +115,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 #### Instruction Pointer:
 - Pointer to next instruction to execute.
 ```
- _________    Bit #
+ _________  Bit#
 |         | 00
 |   ip    |
 |_________| 15
@@ -129,7 +129,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 - First entry should always be NULL.
 - Each entry is 8 bytes in size.
 ```
- ________________________________    Byte #
+ ________________________________  Byte#
 |                                | 00
 | Entry 0  -  NULL               |
 |________________________________| 07
@@ -148,45 +148,45 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 - Defines how to translate a logical address into a linear address.
 - 8 bytes in size.
 ```
- _____________________________________    Bit #
+ _____________________________________  Bit#
 |                                     | 00
-| Limit                               |
+| Limit 0:15                          |    20-bit value, max addressable unit, 0xFFFFF the segment will span 4 Gb of address space. 
 |_____________________________________| 15
 |                                     | 16
-| Base                                |
+| Base 0:15                           |    32-bit value, linear address where the segment begins. 
 |_____________________________________| 31
 |                                     | 32
-| Base                                |
+| Base 16:23                          |
 |_____________________________________| 39
 |        |                            | 40
-|        | Accessed Bit               |
+|        | Accessed Bit               |    Best set to 0, the CPU will set it when the segment is accessed. 
 |        |____________________________| 40
-|        |                            | 41
-|        | Read/Write Bit             |
+|        |                            | 41 Code segments: write access never allowed for segment, 0 = read access not allowed, 1 = read access allowed.
+|        | Read/Write Bit             |    Data segments: Read access always allowed for segment, 0 = write access not allowed, 1 = write access allowed.
 |        |____________________________| 41
 |        |                            | 42
-|        | Direction Bit              |
+|        | Direction Bit              |    0 = segment grows up, 1 = segment grows down (then Offset has to be greater than Limit). 
 |        |____________________________| 42
 |        |                            | 43
-| Access | Execute Bit                |
+| Access | Execute Bit                |    0 = Descriptor defines data segment, 1 = defines code segment which can be executed. 
 |        |____________________________| 43
 |        |                            | 44
-|        | Descriptor type Bit        |
+|        | Descriptor Type Bit        |    0 = Descriptor defines system segment (Task State Segment), 1 = defines code or data segment. 
 |        |____________________________| 44
 |        |                            | 45
-|        | Descriptor Privilege Level |
+|        | Descriptor Privilege Level |    CPU Privilege level for segment, 0 = highest (kernel), 3 = lowest (user applications). 
 |        |____________________________| 46
 |        |                            | 47
-|        | Present Bit                |
+|        | Present Bit                |    Entry refers to valid segment. Must be 1 for any valid segment.
 |________|____________________________| 47
 |                                     | 48
-| Limit                               |
+| Limit 16:19                         |
 |_____________________________________| 51
 |        |                            | 52
-|        | Reserved                   |
+|        | Reserved                   |    
 |        |____________________________| 52
 |        |                            | 53
-|        | Long-Mode Code Flag        |
+|        | Long-Mode Code Flag        |     1 = Descriptor defines 64-bit code segment (Size Flag should always be 0), 0 = any other type of segment. 
 | Flags  |____________________________| 53
 |        |                            | 54
 |        | Size Flag                  |
@@ -195,7 +195,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 |        | Granularity Flag           |
 |________|____________________________| 55
 |                                     | 56
-| Base                                |
+| Base 24:31                          |
 |_____________________________________| 63
 
 ```
