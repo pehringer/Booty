@@ -147,13 +147,15 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 ### Segment Descriptor Format:
 - Defines how to translate a logical address into a linear address.
 - 8 bytes in size.
+  + Base: 32-bit value (broken into 3 chunks) holding linear address where the segment begins.
+  + Limit: 20-bit value (broken into 2 chunks) holding maximum addressable unit (either 1 byte units or 4KiB pages).
 ```
  _____________________________________  Bit#
 |                                     | 00
-| Limit 0:15                          |    20-bit value, max addressable unit, 0xFFFFF the segment will span 4 Gb of address space. 
+| Limit 0:15                          |
 |_____________________________________| 15
 |                                     | 16
-| Base 0:15                           |    32-bit value, linear address where the segment begins. 
+| Base 0:15                           |
 |_____________________________________| 31
 |                                     | 32
 | Base 16:23                          |
@@ -186,13 +188,13 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 |        | Reserved                   |    
 |        |____________________________| 52
 |        |                            | 53
-|        | Long-Mode Code Flag        |     1 = Descriptor defines 64-bit code segment (Size Flag should always be 0), 0 = any other type of segment. 
+|        | Long-Mode Code Flag        |    1 = Descriptor defines 64-bit code segment (Size Flag should always be 0), 0 = any other type of segment. 
 | Flags  |____________________________| 53
 |        |                            | 54
-|        | Size Flag                  |
+|        | Size Flag                  |    0 = Descriptor defines a 16-bit protected mode segment, 1 = defines a 32-bit protected mode segment. 
 |        |____________________________| 54
 |        |                            | 55
-|        | Granularity Flag           |
+|        | Granularity Flag           |    0 = Limit is in 1 Byte blocks, 1 = limit is in 4 KiB blocks. 
 |________|____________________________| 55
 |                                     | 56
 | Base 24:31                          |
