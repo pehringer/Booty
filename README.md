@@ -18,8 +18,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 ---
 # 16-Bit Registers
 #### Accumulator Register:
-- General purpose register.
-- Used for arithmetic and logic instructions.
+General purpose register. Also used for arithmetic and logic instructions.
 - ah = upper 8-bits.
 - al = lower 8-bits.
 ```
@@ -33,8 +32,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 
 ```
 #### Base Register:
-- General purpose register.
-- Used as pointer offset in memory instructions.
+General purpose register. Also used as pointer offset in memory instructions.
 - bh = upper 8-bits.
 - bl = lower 8-bits.
 ```
@@ -48,8 +46,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 
 ```
 #### Count Register:
-- General purpose register.
-- Used for rotate and shift instructions.
+General purpose register. Alao used for rotate and shift instructions.
 - ch = upper 8-bits.
 - cl = lower 8-bits.
 ```
@@ -63,8 +60,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 
 ```
 #### Data Register:
-- General purpose register.
-- Used for I/O and extended arithmetic operations.
+General purpose register. Also used for I/O and extended arithmetic operations.
 - dh = upper 8-bits
 - dl = lower 8-bits
 ```
@@ -77,78 +73,109 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 |____|____| 15
 ```
 #### Stack pointer:
-- Pointer to top of stack.
+Pointer to top of stack.
 ```
- _________  Bit#
-|         | 00
-|   sp    |
-|_________| 15
+ ____  Bit#
+|    | 00
+| SP |
+|____| 15
 
 ```
 #### Base Pointer:
-- Pointer to any location on the stack.
+Pointer to any location on the stack.
 ```
- _________  Bit#
-|         | 00
-|   bp    |
-|_________| 15
+ ____  Bit#
+|    | 00
+| BP |
+|____| 15
 
 ```
 #### Source Index Register:
-- Pointer to data source.
+Pointer to data source.
 ```
- _________  Bit#
-|         | 00
-|   si    |
-|_________| 15
+ ____  Bit#
+|    | 00
+| SI |
+|____| 15
 
 ```
 #### Destination Index Register:
-- Pointer to data destination.
+Pointer to data destination.
 ```
- _________  Bit#
-|         | 00
-|   di    |
-|_________| 15
+ ____  Bit#
+|    | 00
+| DI |
+|____| 15
 
 ```
 #### Instruction Pointer:
-- Pointer to next instruction to execute.
+Pointer to next instruction to execute.
 ```
- _________  Bit#
-|         | 00
-|   ip    |
-|_________| 15
+ ____  Bit#
+|    | 00
+| IP |
+|____| 15
 
 ```
 ---
-# 32-Bit Global Descriptor Table
-### Global Descriptor Table Format:
-- Defines various memory areas used during program execution.
-- Made up of consecutive **Segment Descriptor** entries.
-- First entry should always be NULL.
-- Each entry is 8 bytes in size.
+# 32-Bit Global Descriptor Table (GDT)
+### Global Descriptor Table Pointer:
+The LGDT (Load Global Descriptor Table) instruction is used to load the GDT. The LGDT instruction does this by setting the GDTR (Global Descriptor Table Register) with a pointer to the to **Global Descriptor**. The pointer format is as follows:
+- 16-bit **Size**: The size of the GDT in bytes.
+- 32-bit **Offset**: The linear address of the GDT in memory.
 ```
- ________________________________  Byte#
-|                                | 00
-| Entry 0  -  NULL               |
-|________________________________| 07
-|                                | 08
-| Entry 1  -  Segment Descriptor |
-|________________________________| 15
-|                                | 16
-| Entry 2  -  Segment Descriptor |
-|________________________________| 23
-|                                | 24
-|             . . .              |
-|________________________________| 31
+ ________  Bit#
+|        | 00
+| Limit  |
+|________| 15
+|        | 16
+| Offset |
+|________| 47
+
+```
+
+### Global Descriptor Table Format:
+Defines various memory areas used during program execution. The table is made up of consecutive **Segment Descriptor** entries. The first entry should always be a NULL **Segment Descriptor** (all zeros). The table format is as follows:
+```
+ ____________________  Byte#
+|                    | 00
+| NULL               |
+|____________________| 07
+|                    | 08
+| Segment Descriptor |
+|____________________| 15
+|                    | 16
+| Segment Descriptor |
+|____________________| 23
+|                    | 24
+| . . .              |
+|____________________| 31
 
 ```
 ### Segment Descriptor Format:
-- Defines how to translate a logical address into a linear address.
-- 8 bytes in size.
-  + Base: 32-bit value (broken into 3 chunks) holding linear address where the segment begins.
-  + Limit: 20-bit value (broken into 2 chunks) holding maximum addressable unit (either 1 byte units or 4KiB pages).
+Defines how to translate a logical address into a linear address. The discriptor format is as follows:
+- 16-bit **Limit**: (bits 00-15 of 20-bit value) Maximum addressable unit (either 1 byte units or 4KiB pages).
+- 16-bit **Base**: (bits 00-15 of 32-bit value) Linear address where the segment begins.
+- 08-bit **Base**: (bits 16-23 of 32-bit value) Linear address where the segment begins.
+- 08-bit **Access**:
+  + 01-bit **Accessed**: Best set to 0, the CPU will set it when the segment is accessed.
+  + 01-bit **Readable/Writable**:
+    * Code segments: write access never allowed for segment, 0 = read access not allowed, 1 = read access allowed.
+    * Data segments: Read access always allowed for segment, 0 = write access not allowed, 1 = write access allowed.
+  + 01-bit **Direction/Conforming**:
+    * Code segments: 0 = code in this segment can only be executed from equal privilege levels (**Descriptor Privilege Level**), 1 = code in this segment can be executed from equal or lower privilege levels.
+    * Data segments: 0 = segment grows up, 1 = segment grows down (then Offset has to be greater than Limit).
+  + 01-bit **Executable**: 0 = Descriptor defines data segment, 1 = defines code segment which can be executed.
+  + 01-bit **Descriptor Type**: 0 = Descriptor defines system segment (Task State Segment), 1 = defines code or data segment.
+  + 02-bit **Descriptor Privilege Level**: CPU Privilege level for segment, 0 = highest (kernel), 3 = lowest (user applications).
+  + 01-bit **Present**: Entry refers to valid segment. Must be 1 for any valid segment.
+- 04-bit **Limit**: (bits 16-19 of 20-bit value) Maximum addressable unit (either 1 byte units or 4KiB pages).
+- 08-bit **Flags**:
+  + 01-bit ***Reserved***.
+  + 01-bit **Long-Mode Code**: 1 = Descriptor defines 64-bit code segment (Size Flag should always be 0), 0 = any other type of segment.
+  + 01-bit **Size**: 0 = Descriptor defines a 16-bit protected mode segment, 1 = defines a 32-bit protected mode segment.
+  + 01-bit **Granularity**: 0 = Limit is in 1 Byte blocks, 1 = limit is in 4 KiB blocks.
+- 08-bit **Base**:  (bits 24-31 of 32-bit value) Linear address where the segment begins.
 ```
  _____________________________________  Bit#
 |                                     | 00
@@ -161,25 +188,25 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 | Base 16:23                          |
 |_____________________________________| 39
 |        |                            | 40
-|        | Accessed Bit               |    Best set to 0, the CPU will set it when the segment is accessed. 
+|        | Accessed                   |
 |        |____________________________| 40
-|        |                            | 41 Code segments: write access never allowed for segment, 0 = read access not allowed, 1 = read access allowed.
-|        | Read/Write Bit             |    Data segments: Read access always allowed for segment, 0 = write access not allowed, 1 = write access allowed.
+|        |                            | 41
+|        | Readable/Writable          |
 |        |____________________________| 41
 |        |                            | 42
-|        | Direction Bit              |    0 = segment grows up, 1 = segment grows down (then Offset has to be greater than Limit). 
+|        | Direction/Conforming       |
 |        |____________________________| 42
 |        |                            | 43
-| Access | Execute Bit                |    0 = Descriptor defines data segment, 1 = defines code segment which can be executed. 
+| Access | Executable                 |
 |        |____________________________| 43
 |        |                            | 44
-|        | Descriptor Type Bit        |    0 = Descriptor defines system segment (Task State Segment), 1 = defines code or data segment. 
+|        | Descriptor Type            |
 |        |____________________________| 44
 |        |                            | 45
-|        | Descriptor Privilege Level |    CPU Privilege level for segment, 0 = highest (kernel), 3 = lowest (user applications). 
+|        | Descriptor Privilege Level | 
 |        |____________________________| 46
 |        |                            | 47
-|        | Present Bit                |    Entry refers to valid segment. Must be 1 for any valid segment.
+|        | Present                    |
 |________|____________________________| 47
 |                                     | 48
 | Limit 16:19                         |
@@ -188,13 +215,13 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 |        | Reserved                   |    
 |        |____________________________| 52
 |        |                            | 53
-|        | Long-Mode Code Flag        |    1 = Descriptor defines 64-bit code segment (Size Flag should always be 0), 0 = any other type of segment. 
+|        | Long-Mode Code             |
 | Flags  |____________________________| 53
 |        |                            | 54
-|        | Size Flag                  |    0 = Descriptor defines a 16-bit protected mode segment, 1 = defines a 32-bit protected mode segment. 
+|        | Size                       |
 |        |____________________________| 54
 |        |                            | 55
-|        | Granularity Flag           |    0 = Limit is in 1 Byte blocks, 1 = limit is in 4 KiB blocks. 
+|        | Granularity                | 
 |________|____________________________| 55
 |                                     | 56
 | Base 24:31                          |
