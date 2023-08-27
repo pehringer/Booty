@@ -1,128 +1,82 @@
 # Required Tools
+
 - NASM:
   + Assembler and disassembler for the Intel x86 architecture.
   + It can be used to write 16-bit, 32-bit and 64-bit programs.
+  
 - QEMU:
   + Emulates processors through dynamic binary translation.
   + Provides a set of different hardware and device models.
+
 ---
+
 # Compiling Assembly Code
+
 ```
 nasm -f bin [ASSEMBLY_FILE_NAME].asm -o [MACHINE_FILE_NAME].bin
 ```
+
 ---
+
 # Running Machine Code
+
 ```
 qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 ```
+
 ---
+
 # 16-Bit Registers
-#### Accumulator Register:
-General purpose register. Also used for arithmetic and logic instructions.
+
+**AX** - Accumulator Register:
+- General purpose register.
+- Used for arithmetic and logic instructions.
 - ah = upper 8-bits.
 - al = lower 8-bits.
-```
- _________  Bit#
-|    |    | 00
-|    | al |
-| ax |____| 07
-|    |    | 08
-|    | ah |
-|____|____| 15
 
-```
-#### Base Register:
-General purpose register. Also used as pointer offset in memory instructions.
+**BX** - Base Register:
+- General purpose register.
+- Used as pointer offset in memory instructions.
 - bh = upper 8-bits.
 - bl = lower 8-bits.
-```
- _________  Bit#
-|    |    | 00
-|    | bl |
-| bx |____| 07
-|    |    | 08
-|    | bh |
-|____|____| 15
 
-```
-#### Count Register:
-General purpose register. Alao used for rotate and shift instructions.
+**CX** - Count Register:
+- General purpose register.
+- Used for rotate and shift instructions.
 - ch = upper 8-bits.
 - cl = lower 8-bits.
-```
- _________  Bit#
-|    |    | 00
-|    | cl |
-| cx |____| 07
-|    |    | 08
-|    | ch |
-|____|____| 15
 
-```
-#### Data Register:
-General purpose register. Also used for I/O and extended arithmetic operations.
+**DX** - Data Register:
+- General purpose register.
+- Used for I/O and extended arithmetic operations.
 - dh = upper 8-bits
-- dl = lower 8-bits
-```
- _________  Bit#
-|    |    | 00
-|    | dl |
-| dx |____| 07
-|    |    | 08
-|    | dh |
-|____|____| 15
-```
-#### Stack pointer:
-Pointer to top of stack.
-```
- ____  Bit#
-|    | 00
-| SP |
-|____| 15
+- dl = lower 8-bits.
 
-```
-#### Base Pointer:
-Pointer to any location on the stack.
-```
- ____  Bit#
-|    | 00
-| BP |
-|____| 15
+**SP** - Stack pointer:
+- Pointer to top of stack.
 
-```
-#### Source Index Register:
-Pointer to data source.
-```
- ____  Bit#
-|    | 00
-| SI |
-|____| 15
+**BP** - Base Pointer:
+- Pointer to any location on the stack.
 
-```
-#### Destination Index Register:
-Pointer to data destination.
-```
- ____  Bit#
-|    | 00
-| DI |
-|____| 15
+**SI** - Source Index Register:
+- Pointer to data source.
 
-```
-#### Instruction Pointer:
-Pointer to next instruction to execute.
-```
- ____  Bit#
-|    | 00
-| IP |
-|____| 15
+**DI** - Destination Index Register:
+- Pointer to data destination.
 
-```
+**IP** - Instruction Pointer:
+ - Pointer to next instruction to execute.
+
 ---
+
 # 32-Bit Global Descriptor Table (GDT)
+
 ### Global Descriptor Table Pointer:
+
 The LGDT (Load Global Descriptor Table) instruction is used to load the GDT. The LGDT instruction does this by setting the GDTR (Global Descriptor Table Register) with a pointer to the to **Global Descriptor**. The pointer format is as follows:
 - 16-bit **Size**: The size of the GDT in bytes.
 - 32-bit **Offset**: The linear address of the GDT in memory.
+
 ```
  ________  Bit#
 |        | 00
@@ -135,7 +89,9 @@ The LGDT (Load Global Descriptor Table) instruction is used to load the GDT. The
 ```
 
 ### Global Descriptor Table Format:
+
 Defines various memory areas used during program execution. The table is made up of consecutive **Segment Descriptor** entries. The first entry should always be a NULL **Segment Descriptor** (all zeros). The table format is as follows:
+
 ```
  ____________________  Byte#
 |                    | 00
@@ -152,7 +108,9 @@ Defines various memory areas used during program execution. The table is made up
 |____________________| 31
 
 ```
+
 ### Segment Descriptor Format:
+
 Defines how to translate a logical address into a linear address. The discriptor format is as follows:
 - 16-bit **Limit**: (bits 00-15 of 20-bit value) Maximum addressable unit (either 1 byte units or 4KiB pages).
 - 16-bit **Base**: (bits 00-15 of 32-bit value) Linear address where the segment begins.
@@ -176,6 +134,7 @@ Defines how to translate a logical address into a linear address. The discriptor
   + 01-bit **Size**: 0 = Descriptor defines a 16-bit protected mode segment, 1 = defines a 32-bit protected mode segment.
   + 01-bit **Granularity**: 0 = Limit is in 1 Byte blocks, 1 = limit is in 4 KiB blocks.
 - 08-bit **Base**:  (bits 24-31 of 32-bit value) Linear address where the segment begins.
+
 ```
  _____________________________________  Bit#
 |                                     | 00
