@@ -118,21 +118,41 @@ Defines how to translate a logical address into a linear address. The discriptor
 - 08-bit **Access**:
   + 01-bit **Accessed**: Best set to 0, the CPU will set it when the segment is accessed.
   + 01-bit **Readable/Writable**:
-    * Code segments: write access never allowed for segment, 0 = read access not allowed, 1 = read access allowed.
-    * Data segments: Read access always allowed for segment, 0 = write access not allowed, 1 = write access allowed.
+    * Code segments: write access never allowed for segment:
+      * 0 = read access not allowed.
+      * 1 = read access allowed.
+    * Data segments: Read access always allowed for segment:
+      * 0 = write access not allowed.
+      * 1 = write access allowed.
   + 01-bit **Direction/Conforming**:
-    * Code segments: 0 = code in this segment can only be executed from equal privilege levels (**Descriptor Privilege Level**), 1 = code in this segment can be executed from equal or lower privilege levels.
-    * Data segments: 0 = segment grows up, 1 = segment grows down (then Offset has to be greater than Limit).
-  + 01-bit **Executable**: 0 = Descriptor defines data segment, 1 = defines code segment which can be executed.
-  + 01-bit **Descriptor Type**: 0 = Descriptor defines system segment (Task State Segment), 1 = defines code or data segment.
-  + 02-bit **Descriptor Privilege Level**: CPU Privilege level for segment, 0 = highest (kernel), 3 = lowest (user applications).
+    * Code segments:
+      * 0 = code in this segment can only be executed from equal privilege levels (**Descriptor Privilege Level**).
+      * 1 = code in this segment can be executed from equal or lower privilege levels.
+    * Data segments:
+      * 0 = segment grows up.
+      * 1 = segment grows down (then Offset has to be greater than Limit).
+  + 01-bit **Executable**:
+    * 0 = Descriptor defines data segment.
+    * 1 = defines code segment which can be executed.
+  + 01-bit **Descriptor Type**:
+    * 0 = Descriptor defines system segment (Task State Segment).
+    * 1 = defines code or data segment.
+  + 02-bit **Descriptor Privilege Level**: CPU Privilege level for segment:
+    * 0 = highest (kernel).
+    * 3 = lowest (user applications).
   + 01-bit **Present**: Entry refers to valid segment. Must be 1 for any valid segment.
 - 04-bit **Limit**: (bits 16-19 of 20-bit value) Maximum addressable unit (either 1 byte units or 4KiB pages).
 - 08-bit **Flags**:
   + 01-bit ***Reserved***.
-  + 01-bit **Long-Mode Code**: 1 = Descriptor defines 64-bit code segment (Size Flag should always be 0), 0 = any other type of segment.
-  + 01-bit **Size**: 0 = Descriptor defines a 16-bit protected mode segment, 1 = defines a 32-bit protected mode segment.
-  + 01-bit **Granularity**: 0 = Limit is in 1 Byte blocks, 1 = limit is in 4 KiB blocks.
+  + 01-bit **Long-Mode Code**:
+    * 1 = Descriptor defines 64-bit code segment (Size Flag should always be 0).
+    * 0 = any other type of segment.
+  + 01-bit **Size**:
+    * 0 = Descriptor defines a 16-bit protected mode segment.
+    * 1 = defines a 32-bit protected mode segment.
+  + 01-bit **Granularity**:
+    * 0 = Limit is in 1 Byte blocks.
+    * 1 = limit is in 4 KiB blocks.
 - 08-bit **Base**:  (bits 24-31 of 32-bit value) Linear address where the segment begins.
 
 ```
