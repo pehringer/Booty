@@ -10,7 +10,7 @@
 
 ---
 
-# Compiling Assembly Code
+# Compiling x86 Assembly Code
 
 ```
 nasm -f bin [ASSEMBLY_FILE_NAME].asm -o [MACHINE_FILE_NAME].bin
@@ -18,7 +18,7 @@ nasm -f bin [ASSEMBLY_FILE_NAME].asm -o [MACHINE_FILE_NAME].bin
 
 ---
 
-# Running Machine Code
+# Running x86 Machine Code
 
 ```
 qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
@@ -26,7 +26,7 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 
 ---
 
-# 16-Bit Registers
+# 16-Bit x86 Registers
 
 **AX** - Accumulator Register:
 - General purpose register.
@@ -69,7 +69,34 @@ qemu-system-x86_64 -fda [MACHINE_FILE_NAME].bin
 
 ---
 
-# 32-Bit Global Descriptor Table (GDT)
+# 32-Bit x86 Global Descriptor Table (GDT)
+
+Below is diagram that shows how the **Global Descriptor Table Pointer**, **Global Descriptor Table**, and **Segment Descriptor** relate to one another:
+
+```
+ _________________________________
+|                                 |
+| Global Descriptor Table Pointer | --.
+|_________________________________|   |
+ _________________________            |
+|                         |           |
+| Global Descriptor Table | <---------'
+|  ____________________   |
+| |                    |  |
+| | Segment Descriptor |  |
+| |____________________|  |
+| |                    |  |
+| | Segment Descriptor |  |
+| |____________________|  |
+| |                    |  |
+| | Segment Descriptor |  |
+| |____________________|  |
+| |                    |  |
+| | .  .  .            |  |
+| |____________________|  |
+|_________________________|
+
+```
 
 ### Global Descriptor Table Pointer:
 
